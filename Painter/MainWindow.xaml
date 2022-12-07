@@ -1,0 +1,106 @@
+﻿<Window x:Class="Painter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Painter"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+        <Grid DockPanel.Dock="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Menu Grid.Row="0">
+                <MenuItem Header="Файл">
+                    <MenuItem Header="Открыть" Click="Open_Click"/>
+                    <MenuItem Header="Очистить"/>
+                    <MenuItem Header="Сохранить"/>
+                    <MenuItem Header="Сохранить как"/>
+                    <MenuItem Header="Выход"/>
+                </MenuItem>
+                <MenuItem Header="Параметры">
+                    <MenuItem Header="Цвет фона"/>
+                    <MenuItem Header="Задать размер"/>
+                    <MenuItem Header="Режим показа с подпунктами"/>
+                    <MenuItem Header="Исходный размер"/>
+                    <MenuItem Header="Подогнать размер"/>
+                </MenuItem>
+                <MenuItem Header="Действия">
+                    <MenuItem Header="Повороты"/>
+                    <MenuItem Header="Отражения"/>
+                </MenuItem>
+                <MenuItem Header="Эффекты">
+
+                </MenuItem>
+            </Menu>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+
+            </StackPanel>
+
+        </Grid>
+
+        <Grid DockPanel.Dock="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+                <Button Content="Карандаш" Click="Button_Click"/>
+                <Button Content="Линия"/>
+                <Button Content="Рамка"/>
+                <Button Content="Окружность"/>
+                <Button Content="Треугольник"/>
+                <Button Content="Ломаная"/>
+                <Button Content="Бельзе"/>
+                <Button Content="Сплайн"/>
+                <Button Content="Прямоугольник"/>
+                <Button Content="Круг"/>
+                <Button Content="Стерка"/>
+                <Button Content="Текст"/>
+                <Button Content="Область"/>
+                <Button Content="Картинка"/>
+            </StackPanel>
+
+            <Image Grid.Row="1" x:Name="itemPreview"/>
+
+        </Grid>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="16*"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            
+            <Canvas x:Name="workField" SizeChanged="workField_SizeChanged" MouseMove="workField_MouseMove" MouseDown="workField_MouseDown" MouseLeave="workField_MouseLeave" MouseUp="workField_MouseUp" Margin="0,0,0,24" Grid.RowSpan="2">
+
+            </Canvas>
+
+            <StatusBar Grid.Row="1" HorizontalContentAlignment="Stretch">
+                <StatusBarItem>
+                    <TextBlock Text="Файл: не задано"/>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock Text="Картинка"/>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock Text="Размер: "/>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock Text="Курсор: "/>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock Text="Дата"/>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock Text="Время"/>
+                </StatusBarItem>
+            </StatusBar>
+        </Grid>
+
+    </DockPanel>
+</Window>
