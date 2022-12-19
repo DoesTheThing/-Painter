@@ -529,7 +529,6 @@ namespace Painter
             capturedBorder = new();
         }
 
-
         private void workField_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
