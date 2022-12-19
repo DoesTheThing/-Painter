@@ -478,18 +478,14 @@ namespace Painter
                 {
                     if (capturedBorder.IsValueCreated)
                     {
-                        capturedBorder.Value.Width = Math.Abs(mousePos.X - prevMousePos.Value.X);
-                        capturedBorder.Value.Height = Math.Abs(mousePos.Y - prevMousePos.Value.Y);
+                        adjustBorderPosition(capturedBorder.Value, prevMousePos.Value, mousePos);
                     }
                     else
                     {
                         Border border = new();
                         border.BorderBrush = GetPrimaryBrush();
                         border.BorderThickness = new Thickness(2);
-                        Canvas.SetLeft(border, prevMousePos.Value.X);
-                        Canvas.SetTop(border, prevMousePos.Value.Y);
-                        border.Width = Math.Abs(mousePos.X - prevMousePos.Value.X); 
-                        border.Height = Math.Abs(mousePos.Y - prevMousePos.Value.Y); 
+                        adjustBorderPosition(border, prevMousePos.Value, mousePos);
 
                         capturedBorder = new(border);
                         workField.Children.Add(capturedBorder.Value);
@@ -499,6 +495,31 @@ namespace Painter
                 {
                     prevMousePos = new(mousePos);
                 }
+            }
+        }
+
+        private void adjustBorderPosition(Border border, Point startP, Point endP)
+        {
+            if (startP.X < endP.X)
+            {
+                Canvas.SetLeft(border, startP.X);
+                border.Width = Math.Abs(endP.X - startP.X);
+            }
+            else
+            {
+                Canvas.SetLeft(border, endP.X);
+                border.Width = Math.Abs(startP.X - endP.X);
+            }
+
+            if (startP.Y < endP.Y)
+            {
+                Canvas.SetTop(border, startP.Y);
+                border.Height = Math.Abs(endP.Y - startP.Y);
+            }
+            else
+            {
+                Canvas.SetTop(border, endP.Y);
+                border.Height = Math.Abs(startP.Y - endP.Y);
             }
         }
 
