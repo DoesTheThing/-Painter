@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:Painter"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
@@ -37,9 +38,12 @@
                 </MenuItem>
             </Menu>
 
-            <StackPanel Orientation="Horizontal" Grid.Row="1">
 
-            </StackPanel>
+            <ToolBar Grid.Row="1">
+                <xctk:ColorPicker x:Name="primary_color" Width="40" SelectedColor="Black"/>
+                <xctk:ColorPicker x:Name="secondary_color" Width="40" SelectedColor="White"/>
+                
+            </ToolBar>
 
         </Grid>
 
@@ -50,20 +54,20 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
-                <Button Content="Карандаш" Click="Button_Click"/>
-                <Button Content="Линия"/>
-                <Button Content="Рамка"/>
-                <Button Content="Окружность"/>
-                <Button Content="Треугольник"/>
-                <Button Content="Ломаная"/>
-                <Button Content="Бельзе"/>
-                <Button Content="Сплайн"/>
-                <Button Content="Прямоугольник"/>
-                <Button Content="Круг"/>
-                <Button Content="Стерка"/>
-                <Button Content="Текст"/>
-                <Button Content="Область"/>
-                <Button Content="Картинка"/>
+                <Button Content="Карандаш" Click="Pen_Button_Click"/>
+                <Button Content="Линия" Click="Line_Button_Click"/>
+                <Button Content="Рамка" Click="Border_Button_Click"/>
+                <Button Content="Окружность" Click="Borderless_circle_Button_Click"/>
+                <Button Content="Треугольник" Click="Triangle_Button_Click"/>
+                <Button Content="Ломаная" Click="Brocken_line_Button_Click"/>
+                <Button Content="Бельзе" Click="Bezie_Button_Click"/>
+                <Button Content="Сплайн" Click="Spline_Button_Click"/>
+                <Button Content="Прямоугольник" Click="Rectangle_Button_Click"/>
+                <Button Content="Круг" Click="Circle_Button_Click"/>
+                <Button Content="Стерка" Click="Eraser_Button_Click"/>
+                <Button Content="Текст" Click="Text_Button_Click"/>
+                <Button Content="Область" Click="Area_Button_Click"/>
+                <Button Content="Картинка" Click="Picture_Button_Click"/>
             </StackPanel>
 
             <Image Grid.Row="1" x:Name="itemPreview"/>

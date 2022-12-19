@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "FjldKk5qBTaTGZA//DV1nuHMN9xDC9ght8B2SqJpD1ThzTaKG1QFyx1I+T23o1flnbjcXcqbD4NqoWnadxiLgg==",
+  "dgSpecHash": "fZGlFN0cWLGINrjH3aqTU+TFA1uynlbxHjPFxMdleRKm+BEB/DHOQrucpgIwUllcZyAwyPSD0mlta7uYFMNUzg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\PC\\source\\repos\\Painter\\Painter\\Painter.csproj",
+  "projectFilePath": "C:\\Users\\PC\\Source\\Repos\\-Painter\\Painter\\Painter.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PC\\.nuget\\packages\\extended.wpf.toolkit\\4.3.0\\extended.wpf.toolkit.4.3.0.nupkg.sha512"
   ],

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,6 +28,9 @@ namespace Painter
         private Dictionary<CImage, double> aspectRatios = new(); //Images aspect rations
         private double weelDecr = 0.5; // Image scale speed
         private DrawingMode currentMode = DrawingMode.None;//Drawing mode
+        private Lazy<Line> capturedLine = new();//Current captured line
+        private Lazy<Border> capturedBorder = new();//Current captured border
+
 
         public MainWindow()
         {
@@ -346,7 +350,21 @@ namespace Painter
             }
         }
 
-        private void workField_MouseMove(object sender, MouseEventArgs e)
+        #region Mouse events
+        private void onMouseCaprute(object sender, MouseButtonEventArgs e)
+        {
+            switch (currentMode)
+            {
+                case DrawingMode.Line:
+                    lineMouseCaprute(sender, e);
+                    break;
+                case DrawingMode.Border:
+                    borderMouseCaprute(sender, e);
+                    break;
+            }
+        }
+
+        private void onMouseMove(object sender, MouseEventArgs e)
         {
             switch (currentMode)
             {
@@ -354,10 +372,29 @@ namespace Painter
                     penMouseMove(sender, e);
                     break;
                 case DrawingMode.Line:
-                    lineMouseMove(sender, e); 
+                    lineMouseMove(sender, e);
+                    break;
+                case DrawingMode.Border:
+                    borderMouseMove(sender, e);
                     break;
             }
         }
+
+        private void onReleaseMouseCapture(object sender, MouseEventArgs e)
+        {
+            switch (currentMode)
+            {
+                case DrawingMode.Line:
+                    lineReleaseMouseCapture(sender, e);
+                    break;
+                case DrawingMode.Border:
+                    borderReleaseMouseCapture(sender, e);
+                    break;
+            }
+        }
+        #endregion
+
+        private void workField_MouseMove(object sender, MouseEventArgs e) => onMouseMove(sender, e);
 
         private void penMouseMove(object sender, MouseEventArgs e)
         {
@@ -368,7 +405,7 @@ namespace Painter
                 if (prevMousePos.IsValueCreated)
                 {
                     Line line = new();
-                    line.Stroke = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+                    line.Stroke = GetPrimaryBrush();
                     line.StrokeThickness = 2;
                     (line.X1, line.Y1) = (prevMousePos.Value.X, prevMousePos.Value.Y);
                     (line.X2, line.Y2) = (mousePos.X, mousePos.Y);
@@ -381,32 +418,137 @@ namespace Painter
             
         }
 
+
+        private void lineMouseCaprute(object sender, MouseButtonEventArgs e)
+        {
+            prevMousePos = new();
+        }
+
         private void lineMouseMove(object sender, MouseEventArgs e)
         {
+            if ((sender as Canvas).IsMouseCaptured)
+            {
+                System.Windows.Point mousePos = e.MouseDevice.GetPosition(workField);
 
+                if (prevMousePos.IsValueCreated)
+                {
+                    if (capturedLine.IsValueCreated)
+                    {
+                        (capturedLine.Value.X2, capturedLine.Value.Y2) = (mousePos.X, mousePos.Y);
+                    }
+                    else
+                    {
+                        Line line = new();
+                        line.Stroke = GetPrimaryBrush();
+                        line.StrokeThickness = 2;
+                        (line.X1, line.Y1) = (prevMousePos.Value.X, prevMousePos.Value.Y);
+                        (line.X2, line.Y2) = (mousePos.X, mousePos.Y);
+
+                        capturedLine = new(line);
+                        workField.Children.Add(capturedLine.Value);
+                    }
+                }
+                else
+                {
+                    prevMousePos = new(mousePos);
+                }
+            }
         }
+
+        private void lineReleaseMouseCapture(object sender, MouseEventArgs e)
+        {
+            prevMousePos = new();
+            capturedLine = new();
+        }
+
+        private void borderMouseCaprute(object sender, MouseButtonEventArgs e)
+        {
+            prevMousePos = new();
+        }
+
+        private void borderMouseMove(object sender, MouseEventArgs e)
+        {
+            Canvas canvas = sender as Canvas;
+
+            if (canvas.IsMouseCaptured)
+            {
+                System.Windows.Point mousePos = e.MouseDevice.GetPosition(workField);
+
+                if (prevMousePos.IsValueCreated)
+                {
+                    if (capturedBorder.IsValueCreated)
+                    {
+                        capturedBorder.Value.Width = Math.Abs(mousePos.X - prevMousePos.Value.X);
+                        capturedBorder.Value.Height = Math.Abs(mousePos.Y - prevMousePos.Value.Y);
+                    }
+                    else
+                    {
+                        Border border = new();
+                        border.BorderBrush = GetPrimaryBrush();
+                        border.BorderThickness = new Thickness(2);
+                        Canvas.SetLeft(border, prevMousePos.Value.X);
+                        Canvas.SetTop(border, prevMousePos.Value.Y);
+                        border.Width = Math.Abs(mousePos.X - prevMousePos.Value.X); 
+                        border.Height = Math.Abs(mousePos.Y - prevMousePos.Value.Y); 
+
+                        capturedBorder = new(border);
+                        workField.Children.Add(capturedBorder.Value);
+                    }
+                }
+                else
+                {
+                    prevMousePos = new(mousePos);
+                }
+            }
+        }
+
+        private void borderReleaseMouseCapture(object sender, MouseEventArgs e)
+        {
+            prevMousePos = new();
+            capturedBorder = new();
+        }
+
 
         private void workField_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 (sender as Canvas).CaptureMouse();
+                onMouseCaprute(sender, e);
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private Brush GetPrimaryBrush()
         {
-            currentMode = DrawingMode.Pen;
+            return new SolidColorBrush(primary_color.SelectedColor ?? Colors.Black);
         }
+
+        private void Pen_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Pen;
+        private void Line_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Line;
+        private void Border_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Border;
+        private void Borderless_circle_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Borderless_circle;
+        private void Triangle_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Triangle;
+        private void Brocken_line_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Brocken_line;
+        private void Bezie_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Bezie;
+        private void Spline_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Spline;
+        private void Rectangle_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Rectangle;
+        private void Circle_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Circle;
+        private void Eraser_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Eraser;
+        private void Text_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Text;
+        private void Area_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Area;
+        private void Picture_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Picture;
+        
 
         private void workField_MouseLeave(object sender, MouseEventArgs e)
         {
             (sender as Canvas).ReleaseMouseCapture();
+            onReleaseMouseCapture(sender, e);
         }
 
         private void workField_MouseUp(object sender, MouseButtonEventArgs e)
         {
             (sender as Canvas).ReleaseMouseCapture();
+            onReleaseMouseCapture(sender, e);
         }
     }
 }

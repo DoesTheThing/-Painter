@@ -19,6 +19,7 @@ namespace Painter
         Spline,
         Rectangle,
         Circle,
+        Eraser,
         Text,
         Area,
         Picture
