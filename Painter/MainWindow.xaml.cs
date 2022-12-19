@@ -23,6 +23,8 @@ namespace Painter
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MainViewModel viewModel;
+
         private Lazy<ImageSource> source = new(); //Image source
         private Lazy<System.Windows.Point> prevMousePos = new(); //Previos mouse position
         private Dictionary<CImage, double> aspectRatios = new(); //Images aspect rations
@@ -36,6 +38,9 @@ namespace Painter
 
         public MainWindow()
         {
+            viewModel = new MainViewModel();
+            this.DataContext = viewModel;
+
             InitializeComponent();
         }
 
@@ -432,7 +437,7 @@ namespace Painter
                 {
                     Line line = new();
                     line.Stroke = color_brush;
-                    line.StrokeThickness = 2;
+                    line.StrokeThickness = GetThickness();
                     (line.X1, line.Y1) = (prevMousePos.Value.X, prevMousePos.Value.Y);
                     (line.X2, line.Y2) = (mousePos.X, mousePos.Y);
 
@@ -464,7 +469,7 @@ namespace Painter
                     {
                         Line line = new();
                         line.Stroke = GetPrimaryBrush();
-                        line.StrokeThickness = 2;
+                        line.StrokeThickness = GetThickness();
                         (line.X1, line.Y1) = (prevMousePos.Value.X, prevMousePos.Value.Y);
                         (line.X2, line.Y2) = (mousePos.X, mousePos.Y);
 
@@ -508,7 +513,7 @@ namespace Painter
                     {
                         Border border = new();
                         border.BorderBrush = GetPrimaryBrush();
-                        border.BorderThickness = new Thickness(2);
+                        border.BorderThickness = new Thickness(GetThickness());
                         adjustBorderPosition(border, prevMousePos.Value, mousePos);
 
                         capturedBorder = new(border);
@@ -561,7 +566,7 @@ namespace Painter
                         Ellipse borderless_circle = new();
                         borderless_circle.Fill = isFill ? GetPrimaryBrush() : new SolidColorBrush() { Opacity = 0};
                         borderless_circle.Stroke = GetPrimaryBrush();
-                        borderless_circle.StrokeThickness = 2;
+                        borderless_circle.StrokeThickness = GetThickness();
 
                         adjustToSquare(borderless_circle, prevMousePos.Value, mousePos);
 
@@ -676,6 +681,12 @@ namespace Painter
         {
             return new SolidColorBrush(secondary_color.SelectedColor ?? Colors.White);
         }
+
+        private double GetThickness()
+        {
+            return Convert.ToDouble(ThicknessComboBox.SelectedItem ?? 2);
+        }
+
 
         private void Pen_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Pen;
         private void Line_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Line;

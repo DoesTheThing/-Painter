@@ -7,6 +7,10 @@
         xmlns:local="clr-namespace:Painter"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <local:MainViewModel/>
+    </Window.DataContext>
+    
     <DockPanel>
         <Grid DockPanel.Dock="Top">
             <Grid.RowDefinitions>
@@ -42,7 +46,7 @@
             <ToolBar Grid.Row="1">
                 <xctk:ColorPicker x:Name="primary_color" Width="40" SelectedColor="Black"/>
                 <xctk:ColorPicker x:Name="secondary_color" Width="40" SelectedColor="White"/>
-                
+                <ComboBox x:Name="ThicknessComboBox" Width="70" SelectedItem="0" ItemsSource="{Binding Thicknesses}"/>
             </ToolBar>
 
         </Grid>

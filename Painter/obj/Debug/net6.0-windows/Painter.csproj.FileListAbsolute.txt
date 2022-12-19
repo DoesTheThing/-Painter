@@ -76,3 +76,4 @@ C:\Users\PC\Source\Repos\-Painter\Painter\obj\Debug\net6.0-windows\refint\Painte
 C:\Users\PC\Source\Repos\-Painter\Painter\obj\Debug\net6.0-windows\Painter.pdb
 C:\Users\PC\Source\Repos\-Painter\Painter\obj\Debug\net6.0-windows\Painter.genruntimeconfig.cache
 C:\Users\PC\Source\Repos\-Painter\Painter\obj\Debug\net6.0-windows\ref\Painter.dll
+C:\Users\PC\source\repos\-Painter\Painter\obj\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs
