@@ -30,6 +30,8 @@ namespace Painter
         private DrawingMode currentMode = DrawingMode.None;//Drawing mode
         private Lazy<Line> capturedLine = new();//Current captured line
         private Lazy<Border> capturedBorder = new();//Current captured border
+        private Lazy<Ellipse> captured_circle = new();//Current captured circle
+        private Lazy<Rectangle> captured_rectangle = new();//Current captured rectangle
 
 
         public MainWindow()
@@ -361,6 +363,12 @@ namespace Painter
                 case DrawingMode.Border:
                     borderMouseCaprute(sender, e);
                     break;
+                case DrawingMode.Borderless_circle or DrawingMode.Circle:
+                    circleMouseCaprute(sender, e);
+                    break;
+                case DrawingMode.Rectangle:
+                    rectangleMouseCaprute(sender, e);
+                    break;           
             }
         }
 
@@ -369,13 +377,25 @@ namespace Painter
             switch (currentMode)
             {
                 case DrawingMode.Pen:
-                    penMouseMove(sender, e);
+                    abstractPenMouseMove(sender, e, GetPrimaryBrush());
+                    break;
+                case DrawingMode.Eraser:
+                    abstractPenMouseMove(sender, e, GetSecondaryBrush());
                     break;
                 case DrawingMode.Line:
                     lineMouseMove(sender, e);
                     break;
                 case DrawingMode.Border:
                     borderMouseMove(sender, e);
+                    break;
+                case DrawingMode.Borderless_circle:
+                    circleMouseMove(sender, e, false);
+                    break;
+                case DrawingMode.Circle:
+                    circleMouseMove(sender, e, true);
+                    break;
+                case DrawingMode.Rectangle:
+                    rectangleMouseMove(sender, e);
                     break;
             }
         }
@@ -390,13 +410,19 @@ namespace Painter
                 case DrawingMode.Border:
                     borderReleaseMouseCapture(sender, e);
                     break;
+                case DrawingMode.Borderless_circle or DrawingMode.Circle:
+                    circleReleaseMouseCapture(sender, e);
+                    break;
+                case DrawingMode.Rectangle:
+                    rectangleReleaseMouseCapture(sender, e);
+                    break;
             }
         }
         #endregion
 
         private void workField_MouseMove(object sender, MouseEventArgs e) => onMouseMove(sender, e);
 
-        private void penMouseMove(object sender, MouseEventArgs e)
+        private void abstractPenMouseMove(object sender, MouseEventArgs e, Brush color_brush)
         {
             if ((sender as Canvas).IsMouseCaptured)
             {
@@ -405,7 +431,7 @@ namespace Painter
                 if (prevMousePos.IsValueCreated)
                 {
                     Line line = new();
-                    line.Stroke = GetPrimaryBrush();
+                    line.Stroke = color_brush;
                     line.StrokeThickness = 2;
                     (line.X1, line.Y1) = (prevMousePos.Value.X, prevMousePos.Value.Y);
                     (line.X2, line.Y2) = (mousePos.X, mousePos.Y);
@@ -413,11 +439,9 @@ namespace Painter
                     workField.Children.Add(line);
                 }
 
-                prevMousePos = new (mousePos);
-            }   
-            
+                prevMousePos = new(mousePos);
+            }
         }
-
 
         private void lineMouseCaprute(object sender, MouseButtonEventArgs e)
         {
@@ -500,33 +524,138 @@ namespace Painter
 
         private void adjustBorderPosition(Border border, Point startP, Point endP)
         {
-            if (startP.X < endP.X)
-            {
-                Canvas.SetLeft(border, startP.X);
-                border.Width = Math.Abs(endP.X - startP.X);
-            }
-            else
-            {
-                Canvas.SetLeft(border, endP.X);
-                border.Width = Math.Abs(startP.X - endP.X);
-            }
+            Canvas.SetLeft(border, startP.X < endP.X ? startP.X : endP.X);
+            border.Width = Math.Abs(endP.X - startP.X);
 
-            if (startP.Y < endP.Y)
-            {
-                Canvas.SetTop(border, startP.Y);
-                border.Height = Math.Abs(endP.Y - startP.Y);
-            }
-            else
-            {
-                Canvas.SetTop(border, endP.Y);
-                border.Height = Math.Abs(startP.Y - endP.Y);
-            }
+            Canvas.SetTop(border, startP.Y < endP.Y ? startP.Y : endP.Y);
+            border.Height = Math.Abs(endP.Y - startP.Y);
         }
 
         private void borderReleaseMouseCapture(object sender, MouseEventArgs e)
         {
             prevMousePos = new();
             capturedBorder = new();
+        }
+
+        private void circleMouseCaprute(object sender, MouseButtonEventArgs e)
+        {
+            prevMousePos = new();
+        }
+
+        private void circleMouseMove(object sender, MouseEventArgs e, bool isFill)
+        {
+            Canvas canvas = sender as Canvas;
+
+            if (canvas.IsMouseCaptured)
+            {
+                System.Windows.Point mousePos = e.MouseDevice.GetPosition(workField);
+
+                if (prevMousePos.IsValueCreated)
+                {
+                    if (captured_circle.IsValueCreated)
+                    {
+                        adjustToSquare(captured_circle.Value, prevMousePos.Value, mousePos);
+                    }
+                    else
+                    {
+                        Ellipse borderless_circle = new();
+                        borderless_circle.Fill = isFill ? GetPrimaryBrush() : new SolidColorBrush() { Opacity = 0};
+                        borderless_circle.Stroke = GetPrimaryBrush();
+                        borderless_circle.StrokeThickness = 2;
+
+                        adjustToSquare(borderless_circle, prevMousePos.Value, mousePos);
+
+                        captured_circle = new(borderless_circle);
+                        workField.Children.Add(captured_circle.Value);
+                    }
+                }
+                else
+                {
+                    prevMousePos = new(mousePos);
+                }
+            }
+        }
+
+        private void circleReleaseMouseCapture(object sender, MouseEventArgs e)
+        {
+            prevMousePos = new();
+            captured_circle = new();
+        }
+
+
+        private void rectangleMouseCaprute(object sender, MouseButtonEventArgs e)
+        {
+            prevMousePos = new();
+        }
+
+        private void rectangleMouseMove(object sender, MouseEventArgs e)
+        {
+            Canvas canvas = sender as Canvas;
+
+            if (canvas.IsMouseCaptured)
+            {
+                System.Windows.Point mousePos = e.MouseDevice.GetPosition(workField);
+
+                if (prevMousePos.IsValueCreated)
+                {
+                    if (capturedBorder.IsValueCreated)
+                    {
+                        adjustShapePosition(captured_rectangle.Value, prevMousePos.Value, mousePos);
+                    }
+                    else
+                    {
+                        Rectangle rectangle = new();
+                        rectangle.Fill = GetPrimaryBrush();
+                        adjustShapePosition(rectangle, prevMousePos.Value, mousePos);
+
+                        captured_rectangle = new(rectangle);
+                        workField.Children.Add(captured_rectangle.Value);
+                    }
+                }
+                else
+                {
+                    prevMousePos = new(mousePos);
+                }
+            }
+        }
+
+        private void rectangleReleaseMouseCapture(object sender, MouseEventArgs e)
+        {
+            prevMousePos = new();
+            captured_rectangle = new();
+        }
+
+        private void adjustToSquare(Shape shape, Point startP, Point endP)
+        {
+            double xs = Math.Abs(startP.X - endP.X); //Side X size || width
+            double ys = Math.Abs(startP.Y - endP.Y); //Side Y size || height
+            double delta = Math.Abs(xs - ys);
+
+            if (xs > ys)
+            {
+                if (startP.X < endP.X)
+                    endP.X -= delta;
+                else
+                    startP.X -= delta;
+            }
+            else
+            {
+                if (startP.Y < endP.Y)
+                    endP.Y -= delta;
+                else
+                    startP.Y -= delta;
+            }
+
+            adjustShapePosition(shape, startP, endP);
+        }
+
+        private void adjustShapePosition(Shape shape, Point startP, Point endP)
+        {
+            Canvas.SetLeft(shape, startP.X < endP.X ? startP.X : endP.X);
+            shape.Width = Math.Abs(endP.X - startP.X);
+
+            Canvas.SetTop(shape, startP.Y < endP.Y ? startP.Y : endP.Y);
+            shape.Height = Math.Abs(endP.Y - startP.Y);
         }
 
         private void workField_MouseDown(object sender, MouseButtonEventArgs e)
@@ -541,6 +670,11 @@ namespace Painter
         private Brush GetPrimaryBrush()
         {
             return new SolidColorBrush(primary_color.SelectedColor ?? Colors.Black);
+        }
+
+        private Brush GetSecondaryBrush()
+        {
+            return new SolidColorBrush(secondary_color.SelectedColor ?? Colors.White);
         }
 
         private void Pen_Button_Click(object sender, RoutedEventArgs e) => currentMode = DrawingMode.Pen;
